@@ -14,13 +14,24 @@ export const ItemCounter: FC<Props> = ({
   onUpdateQuantity,
   maxValue
 }) => {
+  const addOrRemove = (value: number) => {
+    if (value === -1) {
+      if (currentValue === 1) return;
+      return onUpdateQuantity(currentValue - 1);
+    }
+    if (currentValue >= maxValue) return;
+    onUpdateQuantity(currentValue + 1);
+  };
   return (
     <Box display='flex' alignItems='center'>
-      <IconButton onClick={() => onUpdateQuantity(-1)}>
+      <IconButton onClick={() => addOrRemove(-1)}>
         <RemoveCircleOutline />
       </IconButton>
-      <Typography sx={{ width: 40, textAlign: 'center' }}> {currentValue} </Typography>
-      <IconButton onClick={() => onUpdateQuantity(1)}>
+      <Typography sx={{ width: 40, textAlign: 'center' }}>
+        {' '}
+        {currentValue}{' '}
+      </Typography>
+      <IconButton onClick={() => addOrRemove(1)}>
         <AddCircleOutline />
       </IconButton>
     </Box>

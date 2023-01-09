@@ -1,18 +1,22 @@
 import { Box, Button, Chip, Grid, Typography } from '@mui/material';
 import { ShopLayout } from '../../components/layouts';
 import { ProductSlideshow, SizeSelector } from '../../components/products';
-import { initialData } from '../../database/products';
+import { initialData } from '../../database/seed-data';
 import { ItemCounter } from '../../components/ui/ItemCounter';
 import { IProduct, ICartProduct, ISize } from '../../interfaces';
 import { NextPage, GetStaticProps, GetStaticPaths } from 'next';
 import { dbProducts } from '../../database';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { Router } from '@mui/icons-material';
+import router from 'next/router';
+import { CartContext } from '../../context';
 
 interface Props {
   product: IProduct;
 }
 
 const ProductPage: NextPage<Props> = ({ product }) => {
+  const {updateProductsInCart} = useContext(CartContext);
   const [tempCartProduct, setTempCartProduct] = useState<ICartProduct>({
     _id: product._id,
     image: product.images[0],
@@ -32,25 +36,21 @@ const ProductPage: NextPage<Props> = ({ product }) => {
   };
 
   const onUpdateQuantity = (quantity: number) => {
-
-    if ( quantity > 0 &&
-      tempCartProduct.quantity + quantity < product.inStock
-      ) {
-        setTempCartProduct((currentProduct) => ({
-          ...currentProduct,
-          quantity: tempCartProduct.quantity+quantity
-        }));
-      }
-      if (
-         quantity < 0 && tempCartProduct.quantity - quantity > 2
-         ) {
-
-           setTempCartProduct((currentProduct) => ({
-             ...currentProduct,
-             quantity: tempCartProduct.quantity+quantity
-            }));
-          }
+    setTempCartProduct((currentProduct) => ({
+      ...currentProduct,
+      quantity
+     }));
   };
+
+  const onUpdateCart = () => {
+
+    if (!tempCartProduct.size) return;
+
+    updateProductsInCart(tempCartProduct)
+/*         router.push('/cart');
+ */
+
+  }
 
   return (
     <ShopLayout title={product.title} pageDescription={product.description}>
@@ -85,7 +85,7 @@ const ProductPage: NextPage<Props> = ({ product }) => {
               />
             </Box>
             {product.inStock > 0 ? (
-              <Button color='secondary' className='circular-btn'>
+              <Button color='secondary' className='circular-btn' onClick={onUpdateCart}>
                 {tempCartProduct.size
                   ? 'Agregar al carrito'
                   : 'Seleccione una talla'}
